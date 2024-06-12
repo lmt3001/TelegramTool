@@ -94,7 +94,7 @@ async def claim(session, query_id):
     "variables": {
         "payload": {
             "nonce": generate_random_nonce(),
-            "tapsCount": random.randint(5,10)
+            "tapsCount": random.randint(10,15)
         }
     },
     "query": MUTATION_GAME_PROCESS_TAPS_BATCH
