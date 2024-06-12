@@ -33,15 +33,15 @@ async def Claim_point(session, authorization):
         print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
     return None
 
-async def getBalance(session, authorization):
-    headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
-    url = 'https://api.hamsterkombat.io/clicker/sync'
-    try:
-        async with session.post(url, headers=headers) as response:
-            return await response.json()
-    except aiohttp.ClientError as e:
-        print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
-    return None
+# async def getBalance(session, authorization):
+#     headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
+#     url = 'https://api.hamsterkombat.io/clicker/sync'
+#     try:
+#         async with session.post(url, headers=headers) as response:
+#             return await response.json()
+#     except aiohttp.ClientError as e:
+#         print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
+#     return None
 
 
 async def claimDailyCipher(session, authorization):
@@ -92,8 +92,6 @@ async def check_tasks(session, authorization):
 import time
 async def buy_upgrades(session, token, money):
     headers = {**HEADERS, 'Authorization': f'Bearer {token}'}
-    balance = await getBalance(session, token)
-    current_balance = balance['clickerUser']['balanceCoins']
     try:
         async with session.post(f'{BASE_URL}/clicker/upgrades-for-buy', headers=headers) as response:
             upgrades = (await response.json())['upgradesForBuy']
@@ -103,9 +101,6 @@ async def buy_upgrades(session, token, money):
                     print(f"{Fore.MAGENTA+Style.BRIGHT} Skipping upgrade {upgrade['id']:>30} || Cooldown {cooldown_seconds} seconds")
                     continue
                 if upgrade['isAvailable'] and not upgrade['isExpired'] and upgrade['price'] < money and not upgrade['profitPerHour'] == 0:
-                    if upgrade['price'] > current_balance:
-                        print(f"{Fore.MAGENTA+Style.BRIGHT} Skipping upgrade {upgrade['id']:>21} || Price: {format_balance(upgrade['price'])} || Not enough balance: {format_balance(current_balance)}")
-                        continue
                     try:
                         buy_upgrade_payload = {
                             'upgradeId': upgrade['id'],
