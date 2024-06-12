@@ -1,0 +1,1 @@
+query_id=AAH0IgU2AAAAAPQiBTa-h1fv&user=%7B%22id%22%3A906306292%2C%22first_name%22%3A%22Khanh%22%2C%22last_name%22%3A%22Ngoc%22%2C%22username%22%3A%22thoel30%22%2C%22language_code%22%3A%22vi%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1717741628&hash=17119258cccd82b92628453668c75c1e5da6fc8c347893d2f62917280f1e4af5
