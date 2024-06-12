@@ -123,6 +123,6 @@ async def main():
                     except KeyError:
                         print(f"{Fore.RED+Style.BRIGHT}Start not available")
                 
-            random_delay = random.randint(200, 400)
-            countdown(5)
+            random_delay = random.randint(500, 800)
+            countdown(random_delay)
 asyncio.run(main())
