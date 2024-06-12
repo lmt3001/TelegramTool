@@ -43,7 +43,6 @@ async def Claim_point(session, authorization):
 #         print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
 #     return None
 
-
 async def claimDailyCipher(session, authorization):
     try:
         payload = {
