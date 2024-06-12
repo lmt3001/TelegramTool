@@ -42,7 +42,7 @@ async def Claim_point(session, authorization):
 #     except aiohttp.ClientError as e:
 #         print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
 #     return None
-
+#s
 async def claimDailyCipher(session, authorization):
     try:
         payload = {
