@@ -89,7 +89,7 @@ async def main():
                                         try:
                                             balance=profile['data']['currentAmount']
                                             formatted_balance = format_balance(balance)
-                                            print(f"{Fore.GREEN+Style.BRIGHT}Info: {claim_response['data']} --------- Remaining: {left_coins} --------Balance: {formatted_balance}")
+                                            print(f"{Fore.GREEN+Style.BRIGHT}[Yes] Balance: {formatted_balance}  Remaining: {left_coins} Info: {claim_response['data']}")
                                         except KeyError:
                                             print(f"{Fore.RED+Style.BRIGHT}Get account info not found in the profile response")
                                     else:

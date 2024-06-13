@@ -147,8 +147,8 @@ async def main():
                 money = int(split_query_id(token)[0])
                 query_id= split_query_id(token)[1]
                 print(f"{Fore.YELLOW+Style.BRIGHT}Claiming for token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
-                print(f"{Fore.YELLOW+Style.BRIGHT}Upgarde money: {format_balance(money)}...")
-                print(f"{Fore.YELLOW+Style.BRIGHT}Morse Code Today: {today_code}...")
+                print(f"{Fore.YELLOW+Style.BRIGHT}Upgarde money: {format_balance(money)}")
+                print(f"{Fore.YELLOW+Style.BRIGHT}Morse Code Today: {today_code}")
                 await buy_upgrades(session, query_id, money)
                 await check_tasks(session, query_id)
                 await claimDailyCipher(session, query_id)
@@ -160,7 +160,7 @@ async def main():
                             total_balance = claim_point['clickerUser']['balanceCoins']
                             availableTaps = claim_point['clickerUser']['availableTaps']
                             level = claim_point['clickerUser']['level']
-                            print(f"{Fore.GREEN+Style.BRIGHT} ID: {id}  Balance: {format_balance(total_balance)}  Available tap: {format_balance(availableTaps)} Level {level}")
+                            print(f"{Fore.GREEN+Style.BRIGHT}[HAMSTER] ID: {id}  Balance: {format_balance(total_balance)}  Available tap: {format_balance(availableTaps)} Level: {level}")
                             if availableTaps < 10:
                                 break
                         except KeyError:

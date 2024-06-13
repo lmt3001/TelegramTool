@@ -348,3 +348,65 @@ QUERY_LOGIN = """mutation MutationTelegramUserLogin($webAppData: TelegramWebAppD
                 __typename
             }
         }"""
+        
+        
+QUERY_TAP_BOT_CONFIG = """
+        fragment FragmentTapBotConfig on TelegramGameTapbotOutput {
+          damagePerSec
+          endsAt
+          id
+          isPurchased
+          startsAt
+          totalAttempts
+          usedAttempts
+          __typename
+        }
+
+        query TapbotConfig {
+          telegramGameTapbotGetConfig {
+            ...FragmentTapBotConfig
+            __typename
+          }
+        }
+        """        
+    
+QUERY_TAP_BOT_START = """
+mutation TapbotClaim {
+fragment FragmentTapBotConfig on TelegramGameTapbotOutput {
+  damagePerSec
+  endsAt
+  id
+  isPurchased
+  startsAt
+  totalAttempts
+  usedAttempts
+  __typename
+}
+
+mutation TapbotStart {
+  telegramGameTapbotStart {
+    ...FragmentTapBotConfig
+    __typename
+  }
+}
+""" 
+        
+QUERY_TAP_BOT_CLAIM = """       
+                fragment FragmentTapBotConfig on TelegramGameTapbotOutput {
+          damagePerSec
+          endsAt
+          id
+          isPurchased
+          startsAt
+          totalAttempts
+          usedAttempts
+          __typename
+        }
+
+        mutation TapbotClaim {
+          telegramGameTapbotClaimCoins {
+            ...FragmentTapBotConfig
+            __typename
+          }
+        }
+        """

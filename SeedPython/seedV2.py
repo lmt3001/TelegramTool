@@ -92,9 +92,9 @@ query_ids = read_query_id(filename)
 async def main():
     async with aiohttp.ClientSession() as session:
         while True:
-            print(f"{Fore.MAGENTA+Style.BRIGHT} {start_text}")
+            #print(f"{Fore.MAGENTA+Style.BRIGHT} {start_text}")
             for query_id in query_ids:
-                print(f"{Fore.YELLOW+Style.BRIGHT}Claiming for query_id: {query_id[:20] + '...' if len(query_id) > 20 else query_id}...")
+                print(f"{Fore.YELLOW+Style.BRIGHT}[SEED] {query_id[:20] + '...' if len(query_id) > 20 else query_id}...")
                 profile = await get_profile(session, query_id)
                 if profile:
                     try:

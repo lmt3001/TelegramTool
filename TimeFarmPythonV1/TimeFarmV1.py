@@ -89,9 +89,9 @@ query_ids = read_query_id(filename)
 async def main():
     async with aiohttp.ClientSession() as session:
         while True:
-            print(start_text)
+            #print(start_text)
             for query_id in query_ids:
-                print(f"{Fore.YELLOW+Style.BRIGHT}Claiming for token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
+                print(f"{Fore.YELLOW+Style.BRIGHT}[TIME FARM] Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
                 # user = await get_user(session, query_id)
                 # if user:
                 #     try:
