@@ -88,23 +88,26 @@ async def login(query_id):
             
 async def claim(session, query_id):
     headers = {**HEADERS, "Authorization": f'Bearer {query_id}'}
-
     tap_payload = {
-    "operationName": "MutationGameProcessTapsBatch",
-    "variables": {
-        "payload": {
-            "nonce": generate_random_nonce(),
-            "tapsCount": random.randint(10,35)
-        }
-    },
-    "query": MUTATION_GAME_PROCESS_TAPS_BATCH
+        "operationName": "MutationGameProcessTapsBatch",
+        "variables": {
+            "payload": {
+                "nonce": generate_random_nonce(),
+                "tapsCount": random.randint(10, 35)
+            }
+        },
+        "query": MUTATION_GAME_PROCESS_TAPS_BATCH
     }
-    try:
-        async with session.post(url, headers=headers, json=tap_payload) as response:
-            response.raise_for_status()  # Raise HTTPError for non-200 status codes
-            return await response.json()
-    except aiohttp.ClientError as e:
-        print(f"{Fore.BLUE+Style.BRIGHT}Point Claim: Not available... {e}")
+    for attempt in range(3):  # Retry up to 3 times
+        try:
+            async with session.post(url, headers=headers, json=tap_payload) as response:
+                response.raise_for_status()  # Raise HTTPError for non-200 status codes
+                return await response.json()
+        except aiohttp.ClientError as e:
+            print(f"{Fore.BLUE+Style.BRIGHT}Point Claim: Attempt {attempt + 1} failed... {e}")
+            if attempt < 2:  # Don't delay on the last attempt
+                await asyncio.sleep(2 ** attempt)  # Exponential backoff
+    return None
         
 async def claim_tap_bot(session, query_id):
     headers = {**HEADERS, "Authorization": f'Bearer {query_id}'}
@@ -211,7 +214,7 @@ async def main():
                         except KeyError:
                             print(f"{Fore.RED+Style.BRIGHT}Game info not found in the game info response")
                     await asyncio.sleep(0.5)  # Wait for  0.5 seconds before the next check
-            random_delay = random.randint(100, 200)
+            random_delay = random.randint(100, 500)
             countdown(random_delay)
         
 asyncio.run(main())

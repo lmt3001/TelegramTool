@@ -82,7 +82,7 @@ def main():
     while True:
         #print(start_text)
         for query_id in query_ids:
-            print(f"{Fore.YELLOW + Style.BRIGHT}[CEXP] Processing query_id: {query_id[:20] + '...' if len(query_id) > 20 else query_id}...")
+            print(f"{Fore.YELLOW + Style.BRIGHT}[CEXP] {query_id[:20] + '...' if len(query_id) > 20 else query_id}...")
             
             user_info = get_user_info(query_id)
             if user_info:

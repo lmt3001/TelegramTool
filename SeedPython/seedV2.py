@@ -115,7 +115,7 @@ async def main():
                     print(f"{Fore.RED+Style.BRIGHT}Failed to retrieve balance")
                 await login_bonus(session, query_id)
                 await claim(session, query_id)
-            random_delay = random.randint(100, 200)
+            random_delay = random.randint(100, 900)
             countdown(random_delay)
 
 asyncio.run(main())

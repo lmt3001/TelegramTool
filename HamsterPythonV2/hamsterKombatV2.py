@@ -165,6 +165,6 @@ async def main():
                                 break
                         except KeyError:
                             print(f"{Fore.RED+Style.BRIGHT}Cant get account info") 
-            random_delay = random.randint(100, 200)
+            random_delay = random.randint(100, 500)
             countdown(random_delay)
 asyncio.run(main())
