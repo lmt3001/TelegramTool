@@ -152,7 +152,7 @@ async def start_tap_bot(session, query_id):
 async def claim_booster(session, query_id, booster_type="Recharge"):
     headers = {**HEADERS, "Authorization": f'Bearer {query_id}'}
     payload = {
-        "operationName": "ActivateBooster",
+        "operationName": "telegramGameActivateBooster",
         "variables": {
             "boosterType": booster_type
         },
@@ -163,8 +163,8 @@ async def claim_booster(session, query_id, booster_type="Recharge"):
             response.raise_for_status()
             result = await response.json()
             if 'errors' in result:
-                print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result}")
-                #print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result['errors'][0]['message']}")
+                #print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result}")
+                print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result['errors'][0]['message']}")
                 return None
             print(f"{Fore.BLUE + Style.BRIGHT}Booster claimed!")
             return result
