@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import time
+from datetime import datetime
 from colorama import init, Fore, Style
 import random
 init(autoreset=True)
@@ -44,15 +45,25 @@ async def get_game_info(session, query_id):
 async def claim(session, query_id):
     headers = {**HEADERS, "Token": query_id}
     url = "https://api.yescoin.gold/game/collectCoin"
+    collectAmount = random.randint(5,20)
     try:
-        async with session.post(url, headers=headers, json=10) as response:
+        async with session.post(url, headers=headers, json=collectAmount) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
             return await response.json()
 
     except aiohttp.ClientError as e:
         print(f"{Fore.BLUE+Style.BRIGHT}Point Claim: Not available...")
-        
-# Countdown function
+
+async def full_recovery(session, query_id):
+    headers = {**HEADERS, "Token": query_id}
+    url = "https://api.yescoin.gold/game/recoverCoinPool"
+    try:
+        async with session.post(url, headers=headers, json=10) as response:
+            response.raise_for_status() 
+            return await response.json()
+    except aiohttp.ClientError as e:
+        print(f"{Fore.BLUE+Style.BRIGHT}Full Recovery: Not available...{e.message}")       
+
 def countdown(secs):
     for i in range(secs, 0, -1):
         print(f"\r{Fore.MAGENTA+Style.BRIGHT}Sleeping for {i} seconds...", end="", flush=True)
@@ -64,18 +75,22 @@ def format_balance(balance):
 # Read query_id from file
 def read_query_id(filename):
     with open(filename, "r") as file:
-        return file.read().splitlines()
+        lines = file.readlines()
+        return [line.strip() for line in lines if line.strip() and not line.startswith('#')]
 
 # Example usage
-filename = "authorization.csv"
+filename = "token.txt"
 query_ids = read_query_id(filename)
 
 async def main():
     async with aiohttp.ClientSession() as session:
+        i = 1
         while True:
             print(start_text)
-            for query_id in query_ids:
-                print(f"{Fore.YELLOW+Style.BRIGHT}Claiming for query_id: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
+            for current_query_index, query_id in enumerate(query_ids):
+                if current_query_index == 0 and i != 1:
+                    i = 1
+                print(f"{Fore.YELLOW+Style.BRIGHT}Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
                 while True:
                     info = await get_game_info(session, query_id)
                     if info:
@@ -89,7 +104,8 @@ async def main():
                                         try:
                                             balance=profile['data']['currentAmount']
                                             formatted_balance = format_balance(balance)
-                                            print(f"{Fore.GREEN+Style.BRIGHT}[Yes] Balance: {formatted_balance}  Remaining: {left_coins} Info: {claim_response['data']}")
+                                            info = claim_response['data']
+                                            print(f"{Fore.GREEN+Style.BRIGHT}[Yes{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {formatted_balance}  Remaining: {left_coins} Info: {info}")
                                         except KeyError:
                                             print(f"{Fore.RED+Style.BRIGHT}Get account info not found in the profile response")
                                     else:
@@ -97,11 +113,14 @@ async def main():
                                 else:
                                     print(f"{Fore.RED+Style.BRIGHT}Claim failed")
                             else:
-                                print(f"{Fore.CYAN+Style.BRIGHT}Coin pool is not available, Sleep...")
-                                break  # Exit the loop if left_coins <= 10
+                                charge = await full_recovery(session, query_id)
+                                print(f"{Fore.BLUE+Style.BRIGHT}Full recovery: {charge['data']}")
+                                if charge['data'] == None:
+                                    break 
                         except KeyError:
                             print(f"{Fore.RED+Style.BRIGHT}Game info not found in the game info response")
-                    await asyncio.sleep(0.5)  # Wait for 0.5 seconds before the next check
+                    await asyncio.sleep(0.5)
+                i += 1
             random_delay = random.randint(200, 300)
             countdown(random_delay)
 asyncio.run(main())

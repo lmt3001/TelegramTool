@@ -3,10 +3,10 @@ import asyncio
 import json
 import random
 import string
+from datetime import datetime
 import time
 from urllib.parse import unquote
 from colorama import init, Fore, Style
-from bots.headers import headers_set
 from bots.query import QUERY_USER, QUERY_LOGIN, MUTATION_GAME_PROCESS_TAPS_BATCH, QUERY_GAME_CONFIG, QUERY_TAP_BOT_CLAIM, QUERY_TAP_BOT_START,QUERY_BOOSTER
 import os
 init(autoreset=True)
@@ -152,7 +152,7 @@ async def start_tap_bot(session, query_id):
 async def claim_booster(session, query_id, booster_type="Recharge"):
     headers = {**HEADERS, "Authorization": f'Bearer {query_id}'}
     payload = {
-        "operationName": "telegramGameActivateBooster",
+        "operationName": "ActivateBooster",
         "variables": {
             "boosterType": booster_type
         },
@@ -163,8 +163,8 @@ async def claim_booster(session, query_id, booster_type="Recharge"):
             response.raise_for_status()
             result = await response.json()
             if 'errors' in result:
-                #print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result}")
-                print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result['errors'][0]['message']}")
+                print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result}")
+                #print(f"{Fore.BLUE + Style.BRIGHT}Booster claim error: {result['errors'][0]['message']}")
                 return None
             print(f"{Fore.BLUE + Style.BRIGHT}Booster claimed!")
             return result
@@ -182,14 +182,17 @@ def read_query_id(filename):
     with open(filename, "r") as file:
         lines = file.readlines()
         return [line.strip() for line in lines if line.strip() and not line.startswith('#')]
-filename = "query_id.txt"
+filename = "token.txt"
 query_ids = read_query_id(filename)
 async def main():
     async with aiohttp.ClientSession() as session:
+        i = 1
         while True:
             #print(start_text)
-            for query_id in query_ids:
-                print(f"{Fore.YELLOW+Style.BRIGHT}[MemeFi] {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
+            for current_query_index, query_id in enumerate(query_ids):
+                if current_query_index == 0 and i != 1:
+                    i = 1
+                print(f"{Fore.YELLOW+Style.BRIGHT}Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
                 account = await login(query_id)
                 await claim_tap_bot(session, account)   
                 await start_tap_bot(session, account)
@@ -206,14 +209,15 @@ async def main():
                             if total == 'N/A' or current_health == 'N/A' or current_energy == 'N/A':
                                 print(f"{Fore.RED + Style.BRIGHT}Invalid game info received. Breaking the loop.")
                                 break
-                            print(f"{Fore.GREEN + Style.BRIGHT}[MemeFi] Balance: {format_balance(total)}, Health: {format_balance(current_health)}, Energy: {current_energy}")
-                            if current_energy < 50:
+                            print(f"{Fore.GREEN + Style.BRIGHT}[MemeFi{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {format_balance(total)}, Health: {format_balance(current_health)}, Energy: {current_energy}")
+                            if current_energy < 100:
                                 booster_claimed = await claim_booster(session, account, booster_type="Recharge")
                                 if not booster_claimed:
                                     break
                         except KeyError:
                             print(f"{Fore.RED+Style.BRIGHT}Game info not found in the game info response")
                     await asyncio.sleep(0.5)  # Wait for  0.5 seconds before the next check
+                i += 1           
             random_delay = random.randint(100, 500)
             countdown(random_delay)
         

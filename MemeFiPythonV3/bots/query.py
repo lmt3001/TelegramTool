@@ -371,7 +371,6 @@ QUERY_TAP_BOT_CONFIG = """
         """        
     
 QUERY_TAP_BOT_START = """
-mutation TapbotClaim {
 fragment FragmentTapBotConfig on TelegramGameTapbotOutput {
   damagePerSec
   endsAt

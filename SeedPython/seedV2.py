@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import time,random
 from colorama import init, Fore, Style
+from datetime import datetime
 
 init(autoreset=True)
 
@@ -94,7 +95,7 @@ async def main():
         while True:
             #print(f"{Fore.MAGENTA+Style.BRIGHT} {start_text}")
             for query_id in query_ids:
-                print(f"{Fore.YELLOW+Style.BRIGHT}[SEED] {query_id[:20] + '...' if len(query_id) > 20 else query_id}...")
+                print(f"{Fore.YELLOW+Style.BRIGHT}[SEED] [{datetime.now().strftime('%H:%M:%S')}] {query_id[:20] + '...' if len(query_id) > 20 else query_id}...")
                 profile = await get_profile(session, query_id)
                 if profile:
                     try:

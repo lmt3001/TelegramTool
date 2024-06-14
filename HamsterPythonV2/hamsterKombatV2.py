@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
-import time 
+import time
+from datetime import datetime 
 from colorama import init, Fore, Style
 import random
 init(autoreset=True)
@@ -9,7 +10,7 @@ start_text = """
 █░█ ▄▀█ █▀▄▀█ █▀ ▀█▀ █▀▀ █▀█
 █▀█ █▀█ █░▀░█ ▄█ ░█░ ██▄ █▀▄
 """
-today_code = "HAMSTER"
+today_code = "GAMEFI"
 
 
 HEADERS = {
@@ -141,12 +142,15 @@ tokens = read_query_id(filename)
 
 async def main():
     async with aiohttp.ClientSession() as session:
+        i = 1
         while True:
             print(start_text)
-            for token in tokens:
+            for token_index ,token in enumerate(tokens):
+                if token_index == 0 and i != 1:
+                    i = 1
                 money = int(split_query_id(token)[0])
                 query_id= split_query_id(token)[1]
-                print(f"{Fore.YELLOW+Style.BRIGHT}Claiming for token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
+                print(f"{Fore.YELLOW+Style.BRIGHT}Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
                 print(f"{Fore.YELLOW+Style.BRIGHT}Upgarde money: {format_balance(money)}")
                 print(f"{Fore.YELLOW+Style.BRIGHT}Morse Code Today: {today_code}")
                 await buy_upgrades(session, query_id, money)
@@ -156,15 +160,16 @@ async def main():
                     claim_point = await Claim_point(session, query_id)
                     if claim_point:
                         try:
-                            id = claim_point['clickerUser']['id']
+                            #id = claim_point['clickerUser']['id']
                             total_balance = claim_point['clickerUser']['balanceCoins']
                             availableTaps = claim_point['clickerUser']['availableTaps']
                             level = claim_point['clickerUser']['level']
-                            print(f"{Fore.GREEN+Style.BRIGHT}[HAMSTER] ID: {id}  Balance: {format_balance(total_balance)}  Available tap: {format_balance(availableTaps)} Level: {level}")
+                            print(f"{Fore.GREEN+Style.BRIGHT}[HAMSTER{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {format_balance(total_balance)}  Available tap: {format_balance(availableTaps)} Level: {level}")
                             if availableTaps < 10:
                                 break
                         except KeyError:
                             print(f"{Fore.RED+Style.BRIGHT}Cant get account info") 
+                i += 1  
             random_delay = random.randint(100, 500)
             countdown(random_delay)
 asyncio.run(main())

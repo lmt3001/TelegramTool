@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
-import time 
+import time
+from datetime import datetime
 from colorama import init, Fore, Style
 import random
 init(autoreset=True)
@@ -91,7 +92,7 @@ async def main():
         while True:
             #print(start_text)
             for query_id in query_ids:
-                print(f"{Fore.YELLOW+Style.BRIGHT}[TIME FARM] Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
+                print(f"{Fore.YELLOW+Style.BRIGHT}[TIME FARM] [{datetime.now().strftime('%H:%M:%S')}] Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
                 # user = await get_user(session, query_id)
                 # if user:
                 #     try:
