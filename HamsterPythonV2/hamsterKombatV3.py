@@ -34,16 +34,16 @@ async def Claim_point(session, authorization):
         print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
     return None
 
-# async def getBalance(session, authorization):
-#     headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
-#     url = 'https://api.hamsterkombat.io/clicker/sync'
-#     try:
-#         async with session.post(url, headers=headers) as response:
-#             return await response.json()
-#     except aiohttp.ClientError as e:
-#         print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
-#     return None
-#s
+async def getBalance(session, authorization):
+    headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
+    url = 'https://api.hamsterkombat.io/clicker/sync'
+    try:
+        async with session.post(url, headers=headers) as response:
+            return await response.json()
+    except aiohttp.ClientError as e:
+        print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
+    return None
+
 async def claimDailyCipher(session, authorization):
     try:
         payload = {
@@ -52,9 +52,9 @@ async def claimDailyCipher(session, authorization):
         headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
         async with session.post(f'{BASE_URL}/clicker/claim-daily-cipher', json=payload, headers=headers) as response:
             if response.status == 200:
-                print('Finished claim cipher')
+                print('->Finished claim cipher')
             if response.status == 400:
-                print(f"{Fore.GREEN+Style.BRIGHT} Today already claim cipher {today_code}")
+                print(f"{Fore.GREEN+Style.BRIGHT}->Today already claim cipher {today_code}")
             else:
                 print(f'Cant claim cipher. Status code: {response.status}')
     except Exception as e:
@@ -95,24 +95,27 @@ async def buy_upgrades(session, token, money):
     try:
         async with session.post(f'{BASE_URL}/clicker/upgrades-for-buy', headers=headers) as response:
             upgrades = (await response.json())['upgradesForBuy']
+            balance = await getBalance(session,token)
+            current_balance = balance['clickerUser']['balanceCoins']
             for upgrade in upgrades:
                 cooldown_seconds = upgrade.get('cooldownSeconds')
                 if cooldown_seconds is not None and cooldown_seconds > 0:
-                    print(f"{Fore.MAGENTA+Style.BRIGHT} Skipping upgrade {upgrade['id']:>30} || Cooldown {cooldown_seconds} seconds")
+                    print(f"{Fore.MAGENTA+Style.BRIGHT}->Skipping upgrade {upgrade['id']:>30} (price: {format_balance(upgrade['price'])}) || {Fore.RED+Style.BRIGHT}Cooldown {cooldown_seconds} seconds")
                     continue
                 if upgrade['isAvailable'] and not upgrade['isExpired'] and upgrade['price'] < money and not upgrade['profitPerHour'] == 0:
                     try:
+                        if upgrade['price'] > current_balance:
+                            print(f"{Fore.MAGENTA+Style.BRIGHT}->Skipping upgrade {upgrade['id']:>30} {Fore.RED+Style.BRIGHT}(price: {format_balance(upgrade['price'])}) {Fore.MAGENTA+Style.BRIGHT}|| Balance: {format_balance(current_balance)}")
+                            continue
                         buy_upgrade_payload = {
                             'upgradeId': upgrade['id'],
                             'timestamp': int(time.time())
                         }
                         async with session.post(f'{BASE_URL}/clicker/buy-upgrade', json=buy_upgrade_payload, headers=headers) as purchase_response:
                             if purchase_response.status == 200:
-                                print(f"{Fore.GREEN+Style.BRIGHT} Upgraded {upgrade['id']:>30} || Price: {format_balance(upgrade['price'])}")
-                            # if purchase_response.status == 400:
-                            #     print(f"{Fore.MAGENTA+Style.BRIGHT} Skipping upgrade {upgrade['id']:>30} || Price: {format_balance(upgrade['price'])} || Not enough balance: {format_balance(current_balance)}")
+                                print(f"{Fore.GREEN+Style.BRIGHT}->Upgraded {upgrade['id']:>30} || Price: {format_balance(upgrade['price'])}")
                             else:
-                                print(f"{Fore.RED+Style.BRIGHT} Failed to upgrade {upgrade['id']} - Status code: {purchase_response.status}")
+                                print(f"{Fore.RED+Style.BRIGHT}Failed to upgrade {upgrade['id']} - Status code: {purchase_response.status}")
                     except Exception as error:
                         print(f"Failed to buy upgrade {upgrade['id']}. Error: {error}")
     except Exception as error:

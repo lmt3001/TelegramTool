@@ -178,6 +178,7 @@ def countdown(secs):
         print(f"\r{Fore.MAGENTA+Style.BRIGHT}Sleeping for {i} seconds...", end="", flush=True)
         time.sleep(1)
     print("\r" + " " * 50, end="", flush=True)  # Clear the countdown message
+    print("\n")  # Print a newline to ensure the prompt appears on a new line
 def read_query_id(filename):
     with open(filename, "r") as file:
         lines = file.readlines()
@@ -218,7 +219,7 @@ async def main():
                             print(f"{Fore.RED+Style.BRIGHT}Game info not found in the game info response")
                     await asyncio.sleep(0.5)  # Wait for  0.5 seconds before the next check
                 i += 1           
-            random_delay = random.randint(100, 500)
+            random_delay = random.randint(200, 500)
             countdown(random_delay)
         
 asyncio.run(main())

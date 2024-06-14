@@ -58,10 +58,10 @@ async def claim(session, query_id):
     try:
         async with session.post(url, headers=headers, json={}) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
-            print(f"{Fore.GREEN+Style.BRIGHT}Point Claim: Successful!")
+            print(f"{Fore.GREEN+Style.BRIGHT}->Point Claim: Successful!")
     except aiohttp.ClientError as e:
         #print(f"{Fore.RED+Style.BRIGHT}Claim failed: {e}")
-        print(f"{Fore.BLUE+Style.BRIGHT}Point Claim: Not available...")
+        print(f"{Fore.BLUE+Style.BRIGHT}->Point Claim: Not available...")
 
 async def login_bonus(session, query_id):
     headers = {**HEADERS, "Telegram-Data": query_id}
@@ -69,10 +69,10 @@ async def login_bonus(session, query_id):
     try:
         async with session.post(url, headers=headers, json={}) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
-            print(f"{Fore.GREEN+Style.BRIGHT}Login Bonus: Claim successful!")
+            print(f"{Fore.GREEN+Style.BRIGHT}->Login Bonus: Claim successful!")
     except aiohttp.ClientError as e:
         #print(f"{Fore.RED+Style.BRIGHT}Claim login bonus failed: {e}")
-        print(f"{Fore.BLUE+Style.BRIGHT}Login Bonus: Not available...")
+        print(f"{Fore.BLUE+Style.BRIGHT}->Login Bonus: Not available...")
 
 # Countdown function
 def countdown(secs):
@@ -80,40 +80,36 @@ def countdown(secs):
         print(f"\r{Fore.MAGENTA+Style.BRIGHT}Sleeping for {i} seconds...", end="", flush=True)
         time.sleep(1)
     print("\r" + " " * 50, end="", flush=True)  # Clear the countdown message
+    print("\n")  # Print a newline to ensure the prompt appears on a new line
 
 # Read query_id from file
-def read_query_id(filename):
-    with open(filename, "r") as file:
-        return file.read().splitlines()
+def read_query_ids(filename):
+    try:
+        with open(filename, "r") as file:
+            return [line.strip() for line in file.readlines() if line.strip() and not line.startswith('#')]
+    except IOError:
+        print(f"{Fore.RED+Style.BRIGHT}Error reading file {filename}")
+        return []
 
 # Example usage
 filename = "query_id.txt"
-query_ids = read_query_id(filename)
+query_ids = read_query_ids(filename)
 
 async def main():
     async with aiohttp.ClientSession() as session:
         while True:
             #print(f"{Fore.MAGENTA+Style.BRIGHT} {start_text}")
             for query_id in query_ids:
-                print(f"{Fore.YELLOW+Style.BRIGHT}[SEED] [{datetime.now().strftime('%H:%M:%S')}] {query_id[:20] + '...' if len(query_id) > 20 else query_id}...")
+                print(f"{Fore.YELLOW+Style.BRIGHT}[SEED] [{datetime.now().strftime('%H:%M:%S')}] {query_id[:20] + '...' if len(query_id) > 20 else query_id}")
                 profile = await get_profile(session, query_id)
-                if profile:
+                balance = await get_balance(session, query_id)
+                if profile and balance:
                     try:
-                        print(f"{Fore.BLUE+Style.BRIGHT}User Name: {profile['data']['name']}")
+                        print(f"{Fore.GREEN+Style.BRIGHT}User: {profile['data']['name']}  Balance: {format_balance(balance['data'])}")
                     except KeyError:
-                        print(f"{Fore.RED+Style.BRIGHT}Key 'data' or 'name' not found in the profile response")
+                        print(f"{Fore.RED+Style.BRIGHT}User name and balance not found in the profile response")
                 else:
                     print(f"{Fore.RED+Style.BRIGHT}Failed to retrieve profile")
-
-                balance = await get_balance(session, query_id)
-                if balance:
-                    try:
-                        total_coin = format_balance(balance['data'])
-                        print(f"{Fore.BLUE+Style.BRIGHT}Balance: {total_coin}")
-                    except KeyError:
-                        print(f"{Fore.RED+Style.BRIGHT}Key 'data' not found in the balance response")
-                else:
-                    print(f"{Fore.RED+Style.BRIGHT}Failed to retrieve balance")
                 await login_bonus(session, query_id)
                 await claim(session, query_id)
             random_delay = random.randint(100, 900)

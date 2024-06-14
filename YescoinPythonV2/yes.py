@@ -69,6 +69,7 @@ def countdown(secs):
         print(f"\r{Fore.MAGENTA+Style.BRIGHT}Sleeping for {i} seconds...", end="", flush=True)
         time.sleep(1)
     print("\r" + " " * 50, end="", flush=True)  # Clear the countdown message
+    print("\n")  # Print a newline to ensure the prompt appears on a new line
 
 def format_balance(balance):
     return '{:,.0f}'.format(balance)
