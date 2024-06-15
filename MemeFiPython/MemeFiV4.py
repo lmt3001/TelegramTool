@@ -11,6 +11,7 @@ from bots.query import QUERY_USER, QUERY_LOGIN, MUTATION_GAME_PROCESS_TAPS_BATCH
 import os
 init(autoreset=True)
 
+recharge_flag = 0
 
 start_text = """
 █▀▄▀█ █▀▀ █▀▄▀█ █▀▀ █▀▀ █
@@ -169,7 +170,7 @@ async def claim_booster(session, query_id, booster_type="Recharge"):
             print(f"{Fore.BLUE + Style.BRIGHT}Booster claimed!")
             return result
     except aiohttp.ClientError as e:
-        print(f"{Fore.BLUE + Style.BRIGHT}Claim Booster: Not available... {e}")
+        print(f"{Fore.BLUE + Style.BRIGHT}Claim Booster: Not available...{e}")
         return None
         
 
@@ -212,7 +213,7 @@ async def main():
                                 break
                             print(f"{Fore.GREEN + Style.BRIGHT}[MemeFi{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {format_balance(total)}, Health: {format_balance(current_health)}, Energy: {current_energy}")
                             if current_energy < 100:
-                                booster_claimed = await claim_booster(session, account, booster_type="Recharge")
+                                booster_claimed = await claim_booster(session, account, booster_type="Recharge") if recharge_flag else None
                                 if not booster_claimed:
                                     break
                         except KeyError:

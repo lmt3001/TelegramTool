@@ -10,7 +10,7 @@ start_text = """
 █░█ ▄▀█ █▀▄▀█ █▀ ▀█▀ █▀▀ █▀█
 █▀█ █▀█ █░▀░█ ▄█ ░█░ ██▄ █▀▄
 """
-today_code = "GAMEFI"
+today_code = "DEFI"
 
 
 HEADERS = {
