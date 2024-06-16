@@ -10,7 +10,7 @@ start_text = """
 █░█ ▄▀█ █▀▄▀█ █▀ ▀█▀ █▀▀ █▀█
 █▀█ █▀█ █░▀░█ ▄█ ░█░ ██▄ █▀▄
 """
-today_code = "DEFI"
+today_code = "NFT"
 
 
 HEADERS = {

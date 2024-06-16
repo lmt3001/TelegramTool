@@ -11,7 +11,7 @@ from bots.query import QUERY_USER, QUERY_LOGIN, MUTATION_GAME_PROCESS_TAPS_BATCH
 import os
 init(autoreset=True)
 
-recharge_flag = 0
+recharge_flag = 1
 
 start_text = """
 █▀▄▀█ █▀▀ █▀▄▀█ █▀▀ █▀▀ █
@@ -190,37 +190,46 @@ async def main():
     async with aiohttp.ClientSession() as session:
         i = 1
         while True:
-            #print(start_text)
             for current_query_index, query_id in enumerate(query_ids):
                 if current_query_index == 0 and i != 1:
                     i = 1
-                print(f"{Fore.YELLOW+Style.BRIGHT}Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
+                print(f"{Fore.YELLOW + Style.BRIGHT}Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
+                
                 account = await login(query_id)
-                await claim_tap_bot(session, account)   
+                await claim_tap_bot(session, account)
                 await start_tap_bot(session, account)
+                
                 while True:
                     info = await claim(session, account)
-                    if info is None:
+                    if not info or not info.get('data'):
                         print(f"{Fore.RED + Style.BRIGHT}Failed to get game info. Breaking the loop.")
                         break
-                    if info:
-                        try:
-                            total = info['data']['telegramGameProcessTapsBatch'].get('coinsAmount', 'N/A')
-                            current_health = info['data']['telegramGameProcessTapsBatch'].get('currentBoss', {}).get('currentHealth', 'N/A')
-                            current_energy = info['data']['telegramGameProcessTapsBatch'].get('currentEnergy', 'N/A')
-                            if total == 'N/A' or current_health == 'N/A' or current_energy == 'N/A':
-                                print(f"{Fore.RED + Style.BRIGHT}Invalid game info received. Breaking the loop.")
+                    
+                    try:
+                        data = info['data']
+                        batch = data.get('telegramGameProcessTapsBatch', {})
+                        total = batch.get('coinsAmount', 'N/A')
+                        current_health = batch.get('currentBoss', {}).get('currentHealth', 'N/A')
+                        current_energy = batch.get('currentEnergy', 'N/A')
+                        
+                        if any(val == 'N/A' for val in [total, current_health, current_energy]) or current_health == '0':
+                            print(f"{Fore.RED + Style.BRIGHT}Invalid game info received. Breaking the loop.")
+                            break
+                        
+                        print(f"{Fore.GREEN + Style.BRIGHT}[MemeFi{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {format_balance(total)}, Health: {format_balance(current_health)}, Energy: {current_energy}")
+                        
+                        if current_energy < 100:
+                            booster_claimed = await claim_booster(session, account, booster_type="Recharge") if recharge_flag else None
+                            if not booster_claimed:
                                 break
-                            print(f"{Fore.GREEN + Style.BRIGHT}[MemeFi{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {format_balance(total)}, Health: {format_balance(current_health)}, Energy: {current_energy}")
-                            if current_energy < 100:
-                                booster_claimed = await claim_booster(session, account, booster_type="Recharge") if recharge_flag else None
-                                if not booster_claimed:
-                                    break
-                        except KeyError:
-                            print(f"{Fore.RED+Style.BRIGHT}Game info not found in the game info response")
-                    await asyncio.sleep(0.5)  # Wait for  0.5 seconds before the next check
-                i += 1           
-            random_delay = random.randint(200, 500)
+                    except KeyError:
+                        print(f"{Fore.RED + Style.BRIGHT}Game info not found in the game info response")
+                    
+                    await asyncio.sleep(0.5)
+                
+                i += 1
+            
+            random_delay = random.randint(300, 600)
             countdown(random_delay)
         
 asyncio.run(main())

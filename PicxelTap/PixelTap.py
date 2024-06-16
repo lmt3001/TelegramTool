@@ -114,8 +114,8 @@ async def main():
                         nextFullRestorationDate = progress.get('nextFullRestorationDate','N/A')
                         remaining_time = get_remaining_time(nextFullRestorationDate)
                         print(f"{Fore.BLUE+Style.BRIGHT}->Earn Progress: {format_balance(currentlyAvailable)}/{format_balance(maxAvailable)} Remaining time: {remaining_time}")
-                        if currentlyAvailable > maxAvailable/2:
-                        #if currentlyAvailable > 10000:
+                        #if currentlyAvailable > maxAvailable/2:
+                        if currentlyAvailable > 10000:
                             claim_info = await claim(session,query_id)
                             if claim_info:
                                 claimedAmount=claim_info.get('claimedAmount','N/A')
