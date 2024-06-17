@@ -124,8 +124,7 @@ def convert_time(end_time_ms):
     hours, remainder = divmod(total_seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     remaining_time_str = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
-    return remaining_time,remaining_time_str
-
+    return remaining_time_str
 
 def format_balance(balance):
     try:
@@ -170,23 +169,28 @@ async def main():
                         endFarmTime = balance['farming']['endTime']
                         startFarmingTime = balance['farming']['startTime']
                         currentFarmBalance = balance['farming']['balance']
-                        (remain_time,remain_time_str) = remain_time = convert_time(endFarmTime)
+                        remain_time_str = convert_time(endFarmTime)
                         print(f"{Fore.GREEN+Style.BRIGHT}User: {user_name}  Balance: {format_balance(balance_info)}  Game ticket: {playPass} ")
                         print(f"{Fore.GREEN+Style.BRIGHT}->Farm Balance: {format_balance(currentFarmBalance)} Remain: {remain_time_str}")
-                        if remain_time == 0:
+                        if remain_time_str == '00:00:00':
                             claimInfo = await claimBalance(session,token)
                             if claimInfo:
+                                print(f"{Fore.GREEN+Style.BRIGHT}->Claim Success")
                                 startFarmInfo = await startFarming(session,token)
-                                # claimFriendInfo = await claimBalanceFriend(session,token)
+                                if startFarmInfo:
+                                    print(f"{Fore.GREEN+Style.BRIGHT}->Start Farm Success")
                     balance_friend = await getBalanceFriend(session,token)
                     if balance_friend:
                         balance_friend_info = balance_friend['canClaim']
-                        friend_info = balance_friend
-                                
+                        print(f"{Fore.BLUE+Style.BRIGHT}->Claim Friend: {balance_friend_info}")
+                        if balance_friend_info:
+                            claimFriendInfo = await claimBalanceFriend(session,token)
+                            if claimFriendInfo:
+                                print(f"{Fore.BLUE+Style.BRIGHT}->Claim Friend Success")                 
                     else:
                         print(f"{Fore.RED+Style.BRIGHT}User info or balance not found")
             random_delay = random.randint(500, 1000)
-            countdown(5)
+            countdown(random_delay)
 
 
 asyncio.run(main())
