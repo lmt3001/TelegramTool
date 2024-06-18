@@ -13,7 +13,6 @@ HEADERS = {
     "accept": "application/json, text/plain, */*",
     "accept-language": "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
     "Referer": "https://sexyzbot.pxlvrs.io/",
-    "Secret": "717c5a4e9bcbb84de6804c6f768b8a7ee79a90441bb7d620e6b32e3a5c4e914f"
     }
 
 def read_query_ids(filename):
@@ -105,7 +104,6 @@ async def main():
                 username = user_data.get('username','N/A')
                 balance = user_data.get('clicksCount','N/A')
                 print(f"{Fore.GREEN+Style.BRIGHT}User: {username} Balance: {format_balance(balance)}")
-                
                 progress = await getProgress(session,query_id)
                 if progress:
                     try:

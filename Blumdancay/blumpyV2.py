@@ -90,7 +90,7 @@ async def startFarming(session, token):
 async def getBalanceFriend(session, token):
     headers = COMMON_HEADERS.copy()
     headers['Authorization'] = f'Bearer {token}'
-    url = f'{API_URL}/v1/friends/balance'
+    url = f'{API_URL}/v1/friends/claim'
     try:
         async with session.get(url, headers=headers) as response:
             response.raise_for_status()
@@ -102,7 +102,7 @@ async def getBalanceFriend(session, token):
 async def claimBalanceFriend(session, token):
     headers = COMMON_HEADERS.copy()
     headers['Authorization'] = f'Bearer {token}'
-    url = f'{GAME_URL}/api/v1/farming/claim-friends'
+    url = "https://gateway.blum.codes/v1/friends/claim"
     try:
         async with session.post(url, headers=headers) as response:
             response.raise_for_status()
