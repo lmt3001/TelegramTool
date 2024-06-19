@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import time,json
 from datetime import datetime
+from datetime import timedelta
 from colorama import init, Fore, Style
 import random
 init(autoreset=True)
@@ -105,23 +106,49 @@ async def claim_offline(session, query_id):
         print(f"{Fore.BLUE + Style.BRIGHT}Claim offline Error: {e}")
         return None
     
-# async def claim_daily(session, query_id):
+async def get_daily(session, query_id):
+    headers = {**HEADERS, "Token": query_id}
+    url = "https://api.yescoin.gold/signIn/list"
+    try:
+        async with session.get(url, headers=headers) as response:
+            response.raise_for_status()  # Raise HTTPError for non-200 status codes
+            response_text = await response.text()
+            data = json.loads(response_text)
+            message = data.get('message', "")
+            expired_info = [
+                {"id": item['id'], "expired": str(timedelta(seconds=item['expired']))}
+                for item in data['data'] if item.get('expired') not in (0, None)
+            ]
+            expired_ids = [info['id'] for info in expired_info]
+            expired_times = [info['expired'] for info in expired_info]
+            return message, expired_ids, expired_times
+    except aiohttp.ClientError as e:
+        print(f"Claim offline Error: {e}")
+        return None
+# async def claim_daily(session, query_id, daily_id):
 #     headers = {**HEADERS, "Token": query_id}
-#     url = "https://api.yescoin.gold/game/claimOfflineYesPacBonus"
+#     url = "https://api.yescoin.gold/signIn/claim"
+#     payload = {
+#         "id": str(daily_id),
+#         "signInType": 1,
+#         "destination": "",
+#         "createAt": "1718785952"
+#     }
 #     try:
-#         async with session.post(url, headers=headers) as response:
+#         async with session.post(url, headers=headers, json=payload) as response:
 #             response.raise_for_status()  # Raise HTTPError for non-200 status codes
 #             response_text = await response.text()
 #             data = json.loads(response_text)
-#             message = data.get('message', [])
+#             message = data.get('message', "")
 #             collect_amount = None
 #             if 'data' in data and data['data'] is not None:
-#                 collect_amount = data['data'].get('collectAmount', [])
+#                 collect_amount = data['data'].get('reward', 0)
 #             return message, collect_amount
 #     except aiohttp.ClientError as e:
-#         print(f"{Fore.BLUE + Style.BRIGHT}Claim offline Error: {e}")
-#         return None  
-    
+#         print(f"Client error: {e}")
+#     except Exception as e:
+#         print(f"Unexpected error: {e}")
+        
 async def full_recovery(session, query_id):
     headers = {**HEADERS, "Token": query_id}
     url = "https://api.yescoin.gold/game/recoverCoinPool"
@@ -162,8 +189,9 @@ async def main():
                 print(f"{Fore.YELLOW+Style.BRIGHT}Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
                 
                 profile = await get_account_info(session, query_id)
-                balance=profile['data']['currentAmount']
-                print(f"{Fore.YELLOW+Style.BRIGHT} [Yes{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {format_balance(balance)}")
+                if profile:
+                    balance=profile['data']['currentAmount']
+                    print(f"{Fore.YELLOW+Style.BRIGHT} [Yes{i}] [{datetime.now().strftime('%H:%M:%S')}] Balance: {format_balance(balance)}")
                 
                 offline_mess, offline_amount = await claim_offline(session, query_id)
                 if offline_mess == "Success":
