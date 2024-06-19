@@ -89,9 +89,9 @@ async def get_user_info(session,query_id,user_id):
         print(f"{Fore.RED+Style.BRIGHT}Error fetching profile: {e}")
         return None, None, None    
 
-async def claim(session,user_id,rev,token):
+async def claim(session,user_id,rev,token,queue_length):
     url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.18.0/replicate"
-    queue_length = random.randint(20,80)
+    #queue_length = random.randint(20,80)
     queue = [{"fn": "tap", "async": False, "meta": {"now": int(time.time() * 1000)}} for _ in range(queue_length)]
     payload2 = {
         "abTestsDynamicConfig": {
@@ -152,17 +152,18 @@ async def main():
                     try:
                         userName, Balance, Energy, rev, token = await get_user_info(session, query_id, user_id)
                         if userName is not None:
-                            timeUpdate = await claim(session, user_id, rev, token)
+                            queue_length = random.randint(10,60)
+                            timeUpdate = await claim(session, user_id, rev, token,queue_length)
                             if timeUpdate is not None:
                                 print(f"{Fore.GREEN + Style.BRIGHT}[GEMZ{i}] [{convert_timestamp(timeUpdate)}] Username: {userName} Balance: {format_balance(Balance)} Energy: {format_balance(Energy)}")
-                            if Energy < 50:
+                            if Energy < 30:
                                 break
                         else:
                             print(f"{Fore.RED+Style.BRIGHT}Username or Balance or Energy is None")
-                        #await asyncio.sleep(0.5)
                     except KeyError:
                         print(f"{Fore.RED+Style.BRIGHT}Game info not found in the game info response")
                         break
+                    await asyncio.sleep(0.5)
                 i += 1
             random_delay = random.randint(50, 120)
             countdown(random_delay)
