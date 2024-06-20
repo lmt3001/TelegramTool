@@ -9,26 +9,28 @@ import urllib.parse
 import time
 from colorama import init, Fore, Style
 import random
+import json
+import string
 init(autoreset=True)
 
 headers = {
-    'Accept': 'application/json, text/plain, */*',
-    'Accept-Encoding': 'gzip, deflate, br, zstd',
-    'Accept-Language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
-    'Content-Type': 'application/json',
-    'Origin': 'https://ff.notgemz.gemz.fun',
-    'Referer': 'https://ff.notgemz.gemz.fun/',
-    'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-    'Sec-Ch-Ua-Mobile': '?1',
-    'Sec-Ch-Ua-Platform': '"Android"',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'cross-site',
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36'
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
+    "cache-control": "no-cache",
+    "content-type": "text/plain",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Not/A)Brand\";v=\"8\", \"Chromium\";v=\"126\", \"Google Chrome\";v=\"126\"",
+    "sec-ch-ua-mobile": "?1",
+    "sec-ch-ua-platform": "\"Android\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site"
 }
-
 def taoSid():
-    return base64.b64encode(os.urandom(6)).decode('utf-8')[:9]
+    chars = string.ascii_lowercase + string.digits
+    sid = ''.join(random.choice(chars) for _ in range(9))
+    return sid
 
 def read_query_id(filename):
     with open(filename, "r") as file:
@@ -57,6 +59,33 @@ def convert_query_id(query_id):
     else:
         print ('Cant convert query_id')
 
+
+def extract_info(query_string):
+    parsed_params = urllib.parse.parse_qs(query_string)
+    query_id = parsed_params.get('query_id', [None])[0]
+    user_info = urllib.parse.unquote(parsed_params.get('user', [None])[0])
+    auth_date = parsed_params.get('auth_date', [None])[0]
+    hash_value = parsed_params.get('hash', [None])[0]
+    user_info_dict = json.loads(user_info)
+    user_id = user_info_dict.get('id')
+    first_name = user_info_dict.get('first_name')
+    last_name = user_info_dict.get('last_name')
+    username = user_info_dict.get('username')
+    language_code = user_info_dict.get('language_code')
+    allows_write_to_pm = user_info_dict.get('allows_write_to_pm')
+    formatted_output = (
+        f"auth_date={auth_date}\n"
+        f"hash={hash_value}\n"
+        f"query_id={query_id}\n"
+        f"user=%7B%22id%22%3A{user_id}%2C%22first_name%22%3A%22{first_name}%22%2C"
+        f"%22last_name%22%3A%22{last_name}%22%2C%22username%22%3A%22{username}%22%2C"
+        f"%22language_code%22%3A%22{language_code}%22%2C%22allows_write_to_pm%22%3A"
+        f"{str(allows_write_to_pm).lower()}%7D"
+    )
+
+    return formatted_output
+    
+    
 def countdown(secs):
     for i in range(secs, 0, -1):
         print(f"\r{Fore.MAGENTA+Style.BRIGHT}Sleeping for {i} seconds...", end="", flush=True)
@@ -64,12 +93,12 @@ def countdown(secs):
     print("\r" + " " * 50, end="", flush=True)  # Clear the countdown message
     print("\n")  # Print a newline to ensure the prompt appears on a new line
 
-async def get_user_info(session,query_id,user_id):
-    url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.18.0/loginOrCreate"
+async def get_user_info(session,auth_data,user_id):
+    url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.20.5/loginOrCreate"
     payload1 = {
         'sid': taoSid(),
         'id': user_id,
-        'auth': query_id.replace('&', '\n')
+        'auth': auth_data,
     }
     try:      
         async with session.post(url=url, json=payload1, headers=headers) as response:
@@ -82,6 +111,7 @@ async def get_user_info(session,query_id,user_id):
                 rev = data['data'].get('rev', 'N/A')
                 token = data['data'].get('token', 'N/A')
                 return username, balance, energy, rev, token
+            
             else:
                 print('Data is None')
                 return None, None, None, None, None
@@ -148,12 +178,13 @@ async def main():
                     i = 1
                 print(f"{Fore.YELLOW + Style.BRIGHT}Token: {query_id[:30] + '...' if len(query_id) > 30 else query_id}...")
                 user_id = convert_query_id(query_id)
+                authData = extract_info(query_id)
                 while True:
                     try:
-                        userName, Balance, Energy, rev, token = await get_user_info(session, query_id, user_id)
+                        userName, Balance, Energy, rev, token = await get_user_info(session, authData, user_id)
                         if userName is not None:
                             queue_length = random.randint(10,60)
-                            timeUpdate = await claim(session, user_id, rev, token,queue_length)
+                            timeUpdate = await claim(session, user_id, rev, token, queue_length)
                             if timeUpdate is not None:
                                 print(f"{Fore.GREEN + Style.BRIGHT}[GEMZ{i}] [{convert_timestamp(timeUpdate)}] Username: {userName} Balance: {format_balance(Balance)} Energy: {format_balance(Energy)}")
                             if Energy < 30:
