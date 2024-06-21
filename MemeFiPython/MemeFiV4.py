@@ -11,7 +11,7 @@ from bots.query import QUERY_USER, QUERY_LOGIN, MUTATION_GAME_PROCESS_TAPS_BATCH
 import os
 init(autoreset=True)
 
-recharge_flag = 1
+recharge_flag = 0
 
 start_text = """
 █▀▄▀█ █▀▀ █▀▄▀█ █▀▀ █▀▀ █

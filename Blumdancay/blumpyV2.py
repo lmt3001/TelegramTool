@@ -90,13 +90,13 @@ async def startFarming(session, token):
 async def getBalanceFriend(session, token):
     headers = COMMON_HEADERS.copy()
     headers['Authorization'] = f'Bearer {token}'
-    url = f'{API_URL}/v1/friends/claim'
+    url = f'{API_URL}/v1/friends/balance'
     try:
         async with session.get(url, headers=headers) as response:
             response.raise_for_status()
             return await response.json()
     except aiohttp.ClientError as e:
-        print(f"{Fore.BLUE+Style.BRIGHT} ->Progress error: {e}")
+        print(f"{Fore.BLUE+Style.BRIGHT} ->Dont have friend")
         return None
     
 async def claimBalanceFriend(session, token):
@@ -186,9 +186,8 @@ async def main():
                         if balance_friend_info:
                             claimFriendInfo = await claimBalanceFriend(session,token)
                             if claimFriendInfo:
-                                print(f"{Fore.BLUE+Style.BRIGHT}->Claim Friend Success")                 
-                    else:
-                        print(f"{Fore.RED+Style.BRIGHT}User info or balance not found")
+                                claimed_amount = claim_friend_balance['claimBalance']
+                                print(f"{Fore.GREEN+Style.BRIGHT}->Claim Friend Success: $claimed_amount")                 
             random_delay = random.randint(500, 1000)
             countdown(random_delay)
 
