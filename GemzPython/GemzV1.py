@@ -13,6 +13,7 @@ import json
 import string
 init(autoreset=True)
 
+login_url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.20.6/loginOrCreate"
 headers = {
     "accept": "application/json, text/plain, */*",
     "accept-language": "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
@@ -94,7 +95,7 @@ def countdown(secs):
     print("\n")  # Print a newline to ensure the prompt appears on a new line
 
 async def get_user_info(session,auth_data,user_id):
-    url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.20.5/loginOrCreate"
+    url = login_url
     payload1 = {
         'sid': taoSid(),
         'id': user_id,
@@ -104,20 +105,19 @@ async def get_user_info(session,auth_data,user_id):
         async with session.post(url=url, json=payload1, headers=headers) as response:
             response.raise_for_status()
             data = await response.json()
-            if data['data'] is not None:
+            if data['data'] is not None and data['data']['state'] is not None:
                 username = data['data']['state'].get('username', 'N/A')
                 balance = data['data']['state'].get('balance', 'N/A')
                 energy = data['data']['state'].get('energy', 'N/A')
                 rev = data['data'].get('rev', 'N/A')
                 token = data['data'].get('token', 'N/A')
                 return username, balance, energy, rev, token
-            
             else:
                 print('Data is None')
                 return None, None, None, None, None
     except Exception as e:
         print(f"{Fore.RED+Style.BRIGHT}Error fetching profile: {e}")
-        return None, None, None    
+        return None, None, None, None, None    
 
 async def claim(session,user_id,rev,token,queue_length):
     url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.18.0/replicate"
@@ -183,7 +183,7 @@ async def main():
                     try:
                         userName, Balance, Energy, rev, token = await get_user_info(session, authData, user_id)
                         if userName is not None:
-                            queue_length = random.randint(10,60)
+                            queue_length = random.randint(30,60)
                             timeUpdate = await claim(session, user_id, rev, token, queue_length)
                             if timeUpdate is not None:
                                 print(f"{Fore.GREEN + Style.BRIGHT}[GEMZ{i}] [{convert_timestamp(timeUpdate)}] Username: {userName} Balance: {format_balance(Balance)} Energy: {format_balance(Energy)}")
