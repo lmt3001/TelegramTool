@@ -10,7 +10,7 @@ start_text = """
 █░█ ▄▀█ █▀▄▀█ █▀ ▀█▀ █▀▀ █▀█
 █▀█ █▀█ █░▀░█ ▄█ ░█░ ██▄ █▀▄
 """
-today_code = "PUMP"
+today_code = "FARM"
 
 
 HEADERS = {
