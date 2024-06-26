@@ -1,0 +1,6 @@
+{
+    "secret": "717c5a4e9bcbb84de6804c6f768b8a7ee79a90441bb7d620e6b32e3a5c4e914f",
+    "tgId": "906306292",
+    "initData": "query_id=AAH0IgU2AAAAAPQiBTYNGgcb&user=%7B%22id%22%3A906306292%2C%22first_name%22%3A%22Khanh%22%2C%22last_name%22%3A%22Ngoc%22%2C%22username%22%3A%22thoel30%22%2C%22language_code%22%3A%22vi%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1719060443&hash=2cb5e578df95e6d46a4b5e3e560f6abe452f9791c33b9fcf928244f3d6f09e03",
+    "auto_upgrade": false
+}

@@ -1,0 +1,26 @@
+{
+  "name": "hotclaim",
+  "version": "1.0.0",
+  "description": "hotclaim",
+  "main": "claim.js",
+  "type": "module",
+  "scripts": {
+    "claim": "node claim.js"
+  },
+  "keywords": [
+    "near"
+  ],
+  "author": "CaoBang",
+  "repository": {
+    "type": "git",
+    "url": "https://t.me/dancayairdrop"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "bignumber.js": "^9.1.2",
+    "near-api-js": "^3.0.4",
+    "near-seed-phrase": "^0.1.1",
+    "node-fetch": "^3.3.2",
+    "twisters": "^1.1.0"
+  }
+}

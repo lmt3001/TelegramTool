@@ -1,0 +1,2 @@
+export declare function exponentialBackoff(startWaitTime: any, retryNumber: any, waitBackoff: any, getResult: any): Promise<any>;
+//# sourceMappingURL=exponential-backoff.d.ts.map

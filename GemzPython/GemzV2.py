@@ -11,9 +11,16 @@ from colorama import init, Fore, Style
 import random
 import json
 import string
+import ssl
 init(autoreset=True)
 
-login_url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.20.6/loginOrCreate"
+base_url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.23.0"
+
+
+
+login_url = f"{base_url}/loginOrCreate"
+claim_url = f"{base_url}/replicate"
+
 headers = {
     "accept": "application/json, text/plain, */*",
     "accept-language": "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
@@ -28,6 +35,9 @@ headers = {
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "cross-site"
 }
+
+ssl_context = ssl._create_unverified_context()
+
 def taoSid():
     chars = string.ascii_lowercase + string.digits
     sid = ''.join(random.choice(chars) for _ in range(9))
@@ -102,7 +112,7 @@ async def get_user_info(session,auth_data,user_id):
         'auth': auth_data,
     }
     try:      
-        async with session.post(url=url, json=payload1, headers=headers) as response:
+        async with session.post(url=url, json=payload1, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status()
             data = await response.json()
             if data['data'] is not None and data['data']['state'] is not None:
@@ -120,7 +130,7 @@ async def get_user_info(session,auth_data,user_id):
         return None, None, None, None, None    
 
 async def claim(session,user_id,rev,token,queue_length):
-    url = "https://gemzcoin.us-east-1.replicant.gc-internal.net/gemzcoin/v2.18.0/replicate"
+    url = claim_url
     #queue_length = random.randint(20,80)
     queue = [{"fn": "tap", "async": False, "meta": {"now": int(time.time() * 1000)}} for _ in range(queue_length)]
     payload2 = {
@@ -153,7 +163,7 @@ async def claim(session,user_id,rev,token,queue_length):
         "auth": token
     }
     try:      
-        async with session.post(url=url, json=payload2, headers=headers) as response:
+        async with session.post(url=url, json=payload2, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status() 
             data = await response.json()
             if data['data'] is not None:

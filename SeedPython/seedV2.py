@@ -3,7 +3,7 @@ import asyncio
 import time,random
 from colorama import init, Fore, Style
 from datetime import datetime
-
+import ssl
 init(autoreset=True)
 
 start_text = """
@@ -19,12 +19,13 @@ HEADERS = {
     "priority": "u=1, i",
     "referer": "https://cf.seeddao.org/"
 }
+ssl_context = ssl._create_unverified_context()
 
 async def get_profile(session, query_id):
     headers = {**HEADERS, "Telegram-Data": query_id}
     url = "https://elb.seeddao.org/api/v1/profile"
     try:
-        async with session.get(url, headers=headers) as response:
+        async with session.get(url, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
             return await response.json()
     except aiohttp.ClientError as e:
@@ -35,7 +36,7 @@ async def get_balance(session, query_id):
     headers = {**HEADERS, "Telegram-Data": query_id}
     url = "https://elb.seeddao.org/api/v1/profile/balance"
     try:
-        async with session.get(url, headers=headers) as response:
+        async with session.get(url, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
             return await response.json()
     except aiohttp.ClientError as e:
@@ -56,7 +57,7 @@ async def claim(session, query_id):
     headers = {**HEADERS, "Telegram-Data": query_id}
     url = "https://elb.seeddao.org/api/v1/seed/claim"
     try:
-        async with session.post(url, headers=headers, json={}) as response:
+        async with session.post(url, headers=headers, json={}, ssl=ssl_context) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
             print(f"{Fore.GREEN+Style.BRIGHT}->Point Claim: Successful!")
     except aiohttp.ClientError as e:
@@ -67,7 +68,7 @@ async def login_bonus(session, query_id):
     headers = {**HEADERS, "Telegram-Data": query_id}
     url = "https://elb.seeddao.org/api/v1/login-bonuses"
     try:
-        async with session.post(url, headers=headers, json={}) as response:
+        async with session.post(url, headers=headers, json={}, ssl=ssl_context) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
             print(f"{Fore.GREEN+Style.BRIGHT}->Login Bonus: Claim successful!")
     except aiohttp.ClientError as e:

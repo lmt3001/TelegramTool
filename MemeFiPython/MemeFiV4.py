@@ -8,15 +8,16 @@ import time
 from urllib.parse import unquote
 from colorama import init, Fore, Style
 from bots.query import QUERY_USER, QUERY_LOGIN, MUTATION_GAME_PROCESS_TAPS_BATCH, QUERY_GAME_CONFIG, QUERY_TAP_BOT_CLAIM, QUERY_TAP_BOT_START,QUERY_BOOSTER
-import os
+import ssl
 init(autoreset=True)
 
-recharge_flag = 0
+recharge_flag = 1
 
 start_text = """
 █▀▄▀█ █▀▀ █▀▄▀█ █▀▀ █▀▀ █
 █░▀░█ ██▄ █░▀░█ ██▄ █▀░ █
 """
+ssl_context = ssl._create_unverified_context()
 
 HEADERS = {
         'Accept': 'application/json',
@@ -75,7 +76,7 @@ async def login(query_id):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=HEADERS, json=data) as response:
+        async with session.post(url, headers=HEADERS, json=data, ssl=ssl_context) as response:
             try:
                 json_response = await response.json()
                 if 'errors' in json_response:
@@ -101,7 +102,7 @@ async def claim(session, query_id):
     }
     for attempt in range(3):  # Retry up to 3 times
         try:
-            async with session.post(url, headers=headers, json=tap_payload) as response:
+            async with session.post(url, headers=headers, json=tap_payload, ssl=ssl_context) as response:
                 response.raise_for_status()  # Raise HTTPError for non-200 status codes
                 return await response.json()
         except aiohttp.ClientError as e:
@@ -118,7 +119,7 @@ async def claim_tap_bot(session, query_id):
         "query": QUERY_TAP_BOT_CLAIM
     }
     try:
-        async with session.post(url, headers=headers, json=tap_payload) as response:
+        async with session.post(url, headers=headers, json=tap_payload, ssl=ssl_context) as response:
             response.raise_for_status()
             result = await response.json()
             if 'errors' in result:
@@ -138,7 +139,7 @@ async def start_tap_bot(session, query_id):
         "query": QUERY_TAP_BOT_START
     }
     try:
-        async with session.post(url, headers=headers, json=tap_payload) as response:
+        async with session.post(url, headers=headers, json=tap_payload, ssl=ssl_context) as response:
             response.raise_for_status()  # Raise HTTPError for non-200 status codes
             result = await response.json()
             if 'errors' in result:
@@ -160,7 +161,7 @@ async def claim_booster(session, query_id, booster_type="Recharge"):
         "query": QUERY_BOOSTER
     }
     try:
-        async with session.post(url, headers=headers, json=payload) as response:
+        async with session.post(url, headers=headers, json=payload, ssl=ssl_context) as response:
             response.raise_for_status()
             result = await response.json()
             if 'errors' in result:

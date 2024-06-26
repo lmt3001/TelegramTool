@@ -7,7 +7,7 @@ import aiohttp
 import urllib.parse
 from colorama import init, Fore, Style
 from datetime import datetime, timedelta, timezone
-
+import ssl
 # Initialize colorama for colored output
 init(autoreset=True)
 start_text = """
@@ -36,7 +36,7 @@ HEADERS = {
     "Referer": "https://tg-tap-miniapp.laborx.io/",
     "Referrer-Policy": "strict-origin-when-cross-origin"
 }
-
+ssl_context = ssl._create_unverified_context()
 # Function to read query_ids from file
 def read_query_ids(filename):
     try:
@@ -59,7 +59,7 @@ def decode_query_id(query_id):
 # Function to login and retrieve access token
 async def login(session, query_id):
     try:
-        async with session.post(URL_VALIDATE_INIT, headers=HEADERS, data=query_id) as response:
+        async with session.post(URL_VALIDATE_INIT, headers=HEADERS, data=query_id, ssl=ssl_context) as response:
             response.raise_for_status()
             json_response = await response.json()
             if 'errors' in json_response:
@@ -74,7 +74,7 @@ async def login(session, query_id):
 async def claim_points(session, token):
     try:
         headers = {**HEADERS, "Authorization": f'Bearer {token}'}
-        async with session.post(URL_FINISH_FARMING, headers=headers) as response:
+        async with session.post(URL_FINISH_FARMING, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status()
             return await response.json()
     except aiohttp.ClientError as e:
@@ -85,7 +85,7 @@ async def claim_points(session, token):
 async def start_farming(session, token):
     try:
         headers = {**HEADERS, "Authorization": f'Bearer {token}'}
-        async with session.post(URL_START_FARMING, headers=headers) as response:
+        async with session.post(URL_START_FARMING, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status()
             return await response.json()
     except aiohttp.ClientError as e:
@@ -96,7 +96,7 @@ async def start_farming(session, token):
 async def fetch_account_info(session, token):
     try:
         headers = {**HEADERS, "Authorization": f'Bearer {token}'}
-        async with session.get(URL_ACCOUNT_INFO, headers=headers) as response:
+        async with session.get(URL_ACCOUNT_INFO, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status()
             return await response.json()
     except aiohttp.ClientError as e:

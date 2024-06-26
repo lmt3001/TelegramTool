@@ -4,6 +4,7 @@ import time
 from datetime import datetime 
 from colorama import init, Fore, Style
 import random
+import ssl
 init(autoreset=True)
 
 start_text = """
@@ -11,6 +12,9 @@ start_text = """
 █▀█ █▀█ █░▀░█ ▄█ ░█░ ██▄ █▀▄
 """
 today_code = "FARM"
+
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
 
 
 HEADERS = {
@@ -27,7 +31,7 @@ async def Claim_point(session, authorization):
     }
     url = 'https://api.hamsterkombat.io/clicker/tap'
     try:
-        async with session.post(url, json=payload, headers=headers) as response:
+        async with session.post(url, json=payload, headers=headers, ssl=ssl_context) as response:
             response.raise_for_status() 
             return await response.json()
     except aiohttp.ClientError as e:
@@ -37,8 +41,9 @@ async def Claim_point(session, authorization):
 async def getBalance(session, authorization):
     headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
     url = 'https://api.hamsterkombat.io/clicker/sync'
+    ssl_context.verify_mode = ssl.CERT_NONE
     try:
-        async with session.post(url, headers=headers) as response:
+        async with session.post(url, headers=headers, ssl=ssl_context) as response:
             return await response.json()
     except aiohttp.ClientError as e:
         print(f"{Fore.BLUE+Style.BRIGHT}Claim point ERR: {e}...")
@@ -50,7 +55,7 @@ async def claimDailyCipher(session, authorization):
             'cipher' : f'{today_code}'
         }
         headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
-        async with session.post(f'{BASE_URL}/clicker/claim-daily-cipher', json=payload, headers=headers) as response:
+        async with session.post(f'{BASE_URL}/clicker/claim-daily-cipher', json=payload, headers=headers, ssl=ssl_context) as response:
             if response.status == 200:
                 print('->Finished claim cipher')
             if response.status == 400:
@@ -64,14 +69,14 @@ async def claimDailyCipher(session, authorization):
 async def check_tasks(session, authorization):
     try:
         headers = {**HEADERS, 'Authorization': f'Bearer {authorization}'}
-        async with session.post(f'{BASE_URL}/clicker/list-tasks', headers=headers) as response:
+        async with session.post(f'{BASE_URL}/clicker/list-tasks', headers=headers,ssl=ssl_context) as response:
             if response.status == 200:
                 tasks = (await response.json())['tasks']
                 for task in tasks:
                     if task['id'] == 'streak_days' and not task['isCompleted']:
-                        await session.post(f'{BASE_URL}/clicker/check-task', json={'taskId': 'streak_days'}, headers=headers)
+                        await session.post(f'{BASE_URL}/clicker/check-task', json={'taskId': 'streak_days'}, headers=headers,ssl=ssl_context)
                         print(f'Checked daily task for token {authorization}')
-                async with session.post(f'{BASE_URL}/clicker/boosts-for-buy', headers=headers) as boosts_response:
+                async with session.post(f'{BASE_URL}/clicker/boosts-for-buy', headers=headers,ssl=ssl_context) as boosts_response:
                     if boosts_response.status == 200:
                         boosts = (await boosts_response.json())['boostsForBuy']
                         boost_full_available_taps = next((boost for boost in boosts if boost['id'] == 'BoostFullAvailableTaps'), None)
@@ -80,7 +85,7 @@ async def check_tasks(session, authorization):
                                 'boostId': 'BoostFullAvailableTaps',
                                 'timestamp': int(time.time())
                             }
-                            await session.post(f'{BASE_URL}/clicker/buy-boost', json=buy_boost_payload, headers=headers)
+                            await session.post(f'{BASE_URL}/clicker/buy-boost', json=buy_boost_payload, headers=headers,ssl=ssl_context)
                             print(f'Claim Boost Full Energy for token {authorization}')
                     else:
                         print(f'Cant boosts. Status code: {boosts_response.status}')
@@ -92,8 +97,11 @@ async def check_tasks(session, authorization):
 import time
 async def buy_upgrades(session, token, money):
     headers = {**HEADERS, 'Authorization': f'Bearer {token}'}
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
     try:
-        async with session.post(f'{BASE_URL}/clicker/upgrades-for-buy', headers=headers) as response:
+        async with session.post(f'{BASE_URL}/clicker/upgrades-for-buy', headers=headers, ssl=ssl_context) as response:
             upgrades = (await response.json())['upgradesForBuy']
             balance = await getBalance(session,token)
             current_balance = balance['clickerUser']['balanceCoins']
@@ -111,7 +119,7 @@ async def buy_upgrades(session, token, money):
                             'upgradeId': upgrade['id'],
                             'timestamp': int(time.time())
                         }
-                        async with session.post(f'{BASE_URL}/clicker/buy-upgrade', json=buy_upgrade_payload, headers=headers) as purchase_response:
+                        async with session.post(f'{BASE_URL}/clicker/buy-upgrade', json=buy_upgrade_payload, headers=headers,ssl=ssl_context) as purchase_response:
                             if purchase_response.status == 200:
                                 print(f"{Fore.GREEN+Style.BRIGHT}->Upgraded {upgrade['id']:>30} || Price: {format_balance(upgrade['price'])}")
                             else:
